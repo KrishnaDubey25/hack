@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -12,6 +12,7 @@
             background-color: #000;
             color: white;
             height: 100vh;
+            width: 100vw;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -20,7 +21,6 @@
             transition: background-color 0.3s ease;
         }
 
-        /* डरावना लाल रंग */
         body.scary-mode {
             background-color: #500000;
             animation: pulse 1s infinite;
@@ -36,6 +36,7 @@
             text-align: center;
             width: 90%;
             z-index: 10;
+            padding: 20px;
         }
 
         .microsoft-logo {
@@ -96,128 +97,150 @@
             color: #ffcc00;
         }
 
-        /* वibrate इंडिकेटर */
-        .vibrating {
-            animation: shake 0.5s infinite;
+        /* Start Screen Overlay */
+        #startScreen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: black;
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
-
-        @keyframes shake {
-            0% { transform: translate(1px, 1px) rotate(0deg); }
-            10% { transform: translate(-1px, -2px) rotate(-1deg); }
-            20% { transform: translate(-3px, 0px) rotate(1deg); }
-            30% { transform: translate(3px, 2px) rotate(0deg); }
-            40% { transform: translate(1px, -1px) rotate(1deg); }
-            50% { transform: translate(-1px, 2px) rotate(-1deg); }
-            60% { transform: translate(-3px, 1px) rotate(0deg); }
-            70% { transform: translate(3px, 1px) rotate(-1deg); }
-            80% { transform: translate(-1px, -1px) rotate(1deg); }
-            90% { transform: translate(1px, 2px) rotate(0deg); }
-            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        
+        #startBtn {
+            padding: 20px 40px;
+            font-size: 24px;
+            background: #ff3333;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
         }
 
     </style>
 </head>
 <body id="bodyElement">
 
-    <div class="container" id="mainContainer">
-        <!-- Microsoft Logo -->
+    <!-- Start Screen -->
+    <div id="startScreen">
+        <h1 style="color:white;">⚠️ SYSTEM HACKED ⚠️</h1>
+        <p style="color:#ccc;">Tap to Start Experience</p>
+        <button id="startBtn">TAP HERE</button>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container" id="mainContainer" style="display:none;">
+        
         <div class="microsoft-logo">
             <div class="sq"></div><div class="sq"></div><div class="sq"></div><div class="sq"></div>
         </div>
 
         <h1>⚠️ SYSTEM HACKED ⚠️</h1>
-        <p class="status">माइक्रोसॉफ्ट द्वारा फोन लॉक किया गया है।<br>डेटा मिटाया जा रहा है...</p>
+        <p class="status">Locked by Microsoft.<br>Data is being deleted...</p>
 
-        <!-- कोड इनपुट -->
         <div class="code-box">
-            <p style="margin:0 0 10px 0; font-size:14px;">हैकिंग रोकने के लिए सीक्रेट कोड डालें:</p>
+            <p style="margin:0 0 10px 0; font-size:14px;">Enter Secret Code to Stop Hacking:</p>
             <input type="number" id="secretCode" placeholder="****">
             <button class="unlock-btn" onclick="checkCode()">VERIFY</button>
         </div>
 
-        <!-- मैसेज बॉक्स -->
         <div class="message-box" id="msgBox"></div>
         
-        <!-- कॉल बटन -->
-        <a href="tel:+911234567890" style="color: #fff; text-decoration: underline; font-size: 14px;">या कॉल करें: 1234567890</a>
+        <a href="tel:+911234567890" style="color: #fff; text-decoration: underline; font-size: 14px;">Or Call: 1234567890</a>
     </div>
 
-    <!-- यहाँ आप अपनी साउंड फाइल का लिंक या लोकल फाइल डालें -->
-    <!-- नोट: 'danger.mp3' नाम की एक mp3 फाइल उसी फोल्डर में रखें -->
-    <audio id="dangerSound" src="danger.mp3" loop></audio>
+    <!-- Audio File -->
+    <audio id="dangerSound" src="dangerous.mp3" loop></audio>
 
     <script>
         const body = document.body;
         const msgBox = document.getElementById('msgBox');
         const codeInput = document.getElementById('secretCode');
         const sound = document.getElementById('dangerSound');
+        const startScreen = document.getElementById('startScreen');
+        const mainContainer = document.getElementById('mainContainer');
+        const startBtn = document.getElementById('startBtn');
+        
         let isLocked = true;
 
-        // 1. BACK BUTTON ट्रिक
+        // 1. Start Button Click
+        startBtn.addEventListener('click', function() {
+            startScreen.style.display = 'none';
+            mainContainer.style.display = 'block';
+            
+            // Fullscreen Mode
+            if (document.documentElement.requestFullscreen) {
+                document.documentElement.requestFullscreen();
+            }
+
+            // Vibration Start
+            if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+            
+            // Play Sound
+            sound.play().catch(e => console.log("Audio error: " + e));
+            
+            triggerScaryMode();
+        });
+
+        // 2. Back Button Lock
         history.pushState(null, null, location.href);
         window.onpopstate = function () {
             history.go(1); 
-            
             if(isLocked) {
                 triggerScaryMode();
             }
         };
 
-        // डरावना मोड सक्रिय करने वाला फंक्शन
+        // Scary Mode Function
         function triggerScaryMode() {
             body.classList.add('scary-mode');
             
-            // 1. Vibration Start (300ms का पैटर्न)
+            // Strong Vibration
             if (navigator.vibrate) {
-                navigator.vibrate([200, 100, 200, 100, 500]); 
+                navigator.vibrate([500, 200, 500, 200, 1000]); 
             }
 
-            msgBox.innerHTML = "⚠️ आप भाग नहीं सकते! हैकर्स ने पकड़ लिया!";
+            msgBox.innerHTML = "⚠️ You can't escape! Hackers have caught you!";
             msgBox.style.color = "#fff";
             
-            // साउंड प्ले करें (यदि फाइल मौजूद है)
-            sound.play().catch(e => console.log("Audio play failed"));
+            // Restart Sound if paused
+            sound.currentTime = 0;
+            sound.play().catch(e => {});
 
             setTimeout(() => {
-                msgBox.innerHTML = "❌ प्रोसेस कैंसिल नहीं हो सकता...<br>अब और ज्यादा डेटा मिटा दिया जाएगा!";
+                if(isLocked) {
+                    msgBox.innerHTML = "❌ Process cannot be canceled...<br>More data will be deleted!";
+                }
             }, 2000);
         }
 
-        // 2. कोड चेक करने का फंक्शन
+        // Check Code Function
         function checkCode() {
             const code = codeInput.value;
 
             if (code === "83558") {
-                // सही कोड है
                 body.classList.remove('scary-mode');
-                
-                // Vibration बंद करें
                 if (navigator.vibrate) navigator.vibrate(0);
-                
-                // साउंड बंद करें
                 sound.pause();
 
-                msgBox.innerHTML = "✅ कोड सही है! हैकिंग बंद हो रही है...";
+                msgBox.innerHTML = "✅ Code Correct! Hacking stopped...";
                 msgBox.style.color = "#00ff00"; 
-                
+                isLocked = false; 
+
                 setTimeout(() => {
-                    document.getElementById('mainContainer').innerHTML = `
+                    mainContainer.innerHTML = `
                         <h1 style="color:#00ff00;">🔓 UNLOCKED</h1>
-                        <p>माइक्रोसॉफ्ट द्वारा हैकिंग समाप्त।<br>अब आप फोन का इस्तेमाल कर सकते हैं।</p>
+                        <p>Hacking ended by Microsoft.<br>You can use your phone now.</p>
                     `;
                 }, 3000);
 
             } else {
-                // गलत कोड है - फिर से डरावना मोड
                 triggerScaryMode();
                 codeInput.value = "";
             }
         }
-
-        // पेज लोड होते ही एक बार वibrate करें ताकि यूजर को एहसास हो
-        window.onload = function() {
-            if (navigator.vibrate) navigator.vibrate(200);
-        };
 
     </script>
 </body>
