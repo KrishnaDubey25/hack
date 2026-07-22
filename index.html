@@ -16,9 +16,11 @@
             overflow: hidden;
             user-select: none;
             -webkit-user-select: none;
+            /* Prevents drag gestures from triggering system UI */
+            touch-action: none; 
         }
 
-        /* Scary Background */
+        /* Scary Background Animation */
         body.scary {
             background-color: #300000;
             animation: pulseRed 0.5s infinite alternate;
@@ -59,7 +61,7 @@
             cursor: pointer;
         }
 
-        /* Main Content */
+        /* Main Content (Hidden initially) */
         #mainContent {
             display: none;
             height: 100%;
@@ -213,11 +215,40 @@
         });
 
         // Detect Back Button Press
+        let backClickCount = 0;
+        let backClickTimer;
+
         window.addEventListener('popstate', function() {
             if(isLocked) {
-                history.pushState(null, null, location.href);
-                navigator.vibrate(200);
-                msgBox.innerText = "🚫 BACK BUTTON DISABLED!";
+                // Reset timer
+                clearTimeout(backClickTimer);
+                
+                backClickCount++;
+                
+                if (backClickCount === 1) {
+                    // First click, wait for second click
+                    msgBox.innerText = "🚫 BACK BUTTON DISABLED!";
+                    navigator.vibrate(200);
+                    
+                    backClickTimer = setTimeout(() => {
+                        backClickCount = 0; // Reset if not double clicked within 500ms
+                    }, 500);
+                } else if (backClickCount === 2) {
+                    // Double click, allow exit
+                    msgBox.innerText = "✅ EXITING...";
+                    navigator.vibrate([100, 50, 100]);
+                    
+                    // Small delay to let the user see the message
+                    setTimeout(() => {
+                        isLocked = false;
+                        body.classList.remove('scary');
+                        alarm.pause();
+                        mainContent.innerHTML = `
+                            <h1 style="color:#00ff00; font-size:40px;">🔓 UNLOCKED</h1>
+                            <p>Hacking Complete.<br>You can use your phone now.</p>
+                        `;
+                    }, 500);
+                }
             }
         });
 
