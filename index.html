@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Hacked</title>
+    <title>Hacked System</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; outline: none; }
+        * { margin: 0; padding: 0; box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
         
         body {
             background-color: #000;
@@ -13,7 +13,7 @@
             font-family: 'Courier New', monospace;
             height: 100vh;
             width: 100vw;
-            overflow: hidden;
+            overflow: hidden; /* Scroll band */
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -23,8 +23,8 @@
 
         /* --- Animations --- */
         @keyframes pulse {
-            0% { background-color: #300000; }
-            100% { background-color: #600000; }
+            0% { background-color: #2a0000; }
+            100% { background-color: #500000; }
         }
         
         .scary-bg { animation: pulse 1s infinite alternate; }
@@ -48,7 +48,7 @@
         /* --- Layout --- */
         #start-screen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; z-index: 999;
+            background: #000; z-index: 9999; /* Highest Z-Index */
             display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
 
@@ -70,7 +70,7 @@
         }
 
         input {
-            font-size: 3rem; width: 150px; text-align: center;
+            font-size: 3rem; width: 180px; text-align: center;
             background: transparent; border: none; color: white; margin-bottom: 20px;
         }
 
@@ -119,41 +119,54 @@
 
     let isLocked = true;
     let backCount = 0;
-    const MAX_BACK_PRESSES = 10;
+    const MAX_BACK_PRESSES = 10; // Change this if you want more/fewer presses
     const CORRECT_CODE = "83558";
 
-    // Start Function
-    document.getElementById('start-btn').addEventListener('click', () => {
+    // --- START FUNCTION ---
+    document.getElementById('start-btn').addEventListener('click', async () => {
+        // 1. Hide Start Screen
         startScreen.style.display = 'none';
+        
+        // 2. Show Main Screen
         mainScreen.style.display = 'flex';
         
-        // Effects
+        // 3. Force Full Screen Immediately
+        try {
+            await document.documentElement.requestFullscreen();
+        } catch (e) {
+            console.log("Fullscreen error", e);
+        }
+
+        // 4. Effects
         body.classList.add('scary-bg');
         navigator.vibrate(200);
+        
+        // Audio Play (User interaction allowed now)
         alarm.play().catch(e => console.log("Audio error"));
 
-        // Lock Logic
+        // 5. Lock Logic
         msg.innerText = "🚫 LOCKED";
         
-        // Initialize History Stack for Back Button Trap
+        // 6. Initialize History Stack for Back Button Trap
+        // We push a state so that when back is pressed, we pop it and push again immediately
         history.pushState(null, null, location.href);
         
-        // Auto Unlock in 5 mins
-        setTimeout(() => { if(isLocked) unlock(); }, 300000);
-
-        // Bind Back Button
+        // Bind Back Button Event
         window.onpopstate = function () {
             handleBackPress();
         };
+
+        // Auto Unlock in 5 mins (300000 ms)
+        setTimeout(() => { if(isLocked) unlock(); }, 300000);
     });
 
-    // --- BACK BUTTON LOGIC (FIXED) ---
+    // --- BACK BUTTON LOGIC (FIXED FOR STICKINESS) ---
     function handleBackPress() {
-        if (!isLocked) return; // If already unlocked, do nothing or let it go
+        if (!isLocked) return; // If unlocked, let it go
 
         backCount++;
         
-        // Silent Vibration Feedback (No Text for first 9 presses)
+        // Silent Vibration Feedback
         navigator.vibrate(50); 
         
         // Force Fullscreen again (Fixes exiting fullscreen issue)
@@ -207,11 +220,13 @@
         }, 500);
     }
 
-    // Handle Home Button / Visibility Change
+    // Handle Home Button / Swipe Up (Visibility Change)
     document.addEventListener('visibilitychange', () => {
         if (document.hidden && isLocked) {
             navigator.vibrate(500);
             msg.innerText = "🚫 DON'T LEAVE!";
+            
+            // Force Fullscreen again
             const elem = document.documentElement;
             if (!document.fullscreenElement) {
                 elem.requestFullscreen().catch(err => {});
