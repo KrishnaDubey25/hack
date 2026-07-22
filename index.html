@@ -125,11 +125,11 @@
 
     <!-- Start Screen -->
     <div id="startScreen">
-        <!-- UPDATED SECTION START -->
-        <h1 style="color:white;">⚠️ SYSTEM HACKED ⚠️</h1>
-        <p style="color:#ccc; font-size: 24px; margin-bottom: 30px;">Welcome</p>
+        <!-- REMOVED "SYSTEM HACKED" TITLE FROM FRONT PAGE -->
+        <h1 style="color:white; font-size: 40px;">Welcome</h1>
+        
+        <!-- BUTTON BELOW WELCOME TEXT -->
         <button id="startBtn">TAP HERE</button>
-        <!-- UPDATED SECTION END -->
     </div>
 
     <!-- Main Content -->
@@ -153,8 +153,8 @@
         <a href="tel:+911234567890" style="color: #fff; text-decoration: underline; font-size: 14px;">Or Call: 1234567890</a>
     </div>
 
-    <!-- Audio File -->
-    <audio id="dangerSound" src="dangerous.mp3" loop></audio>
+    <!-- Audio File (Added playsinline and muted for better mobile support) -->
+    <audio id="dangerSound" src="dangerous.mp3" loop playsinline></audio>
 
     <script>
         const body = document.body;
@@ -173,27 +173,46 @@
             mainContainer.style.display = 'block';
             
             // Fullscreen Mode
-            if (document.documentElement.requestFullscreen) {
-                document.documentElement.requestFullscreen();
-            }
-
+            toggleFullScreen();
+            
             // Vibration Start
             if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
             
-            // Play Sound
-            sound.play().catch(e => console.log("Audio error: " + e));
+            // Play Sound (Try to play immediately)
+            sound.play().catch(e => {
+                console.log("Audio play failed: " + e);
+                // If it fails, try again on next touch
+                document.addEventListener('touchstart', function() {
+                    sound.play();
+                }, {once: true});
+            });
             
             triggerScaryMode();
         });
 
-        // 2. Back Button Lock
-        history.pushState(null, null, location.href);
+        // Fullscreen Helper
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.log(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+                });
+            }
+        }
+
+        // 2. Home Button / Swipe Up Lock (Android & iOS)
+        // We use visibilitychange and popstate to detect if user leaves or minimizes
         window.onpopstate = function () {
             history.go(1); 
-            if(isLocked) {
+            if(isLocked) triggerScaryMode();
+        };
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden && isLocked) {
+                // If they minimize, force back or show alert
+                toggleFullScreen();
                 triggerScaryMode();
             }
-        };
+        });
 
         // Scary Mode Function
         function triggerScaryMode() {
