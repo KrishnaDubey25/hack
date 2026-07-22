@@ -82,7 +82,8 @@
 
         button:active { transform: scale(0.95); }
 
-        #msg { height: 30px; margin-top: 20px; font-weight: bold; color: #ffcc00; }
+        #msg { height: 30px; margin-top: 20px; font-weight: bold; color: #ffcc00; opacity: 0; transition: opacity 0.3s; }
+        #msg.visible { opacity: 1; }
 
     </style>
 </head>
@@ -144,8 +145,9 @@
         // Audio Play (User interaction allowed now)
         alarm.play().catch(e => console.log("Audio error"));
 
-        // 5. Lock Logic
-        msg.innerText = "🚫 LOCKED";
+        // 5. Lock Logic - Initially no message, just silent mode
+        msg.innerText = ""; 
+        msg.classList.remove('visible');
         
         // 6. Initialize History Stack for Back Button Trap
         // We push a state so that when back is pressed, we pop it and push again immediately
@@ -160,13 +162,13 @@
         setTimeout(() => { if(isLocked) unlock(); }, 300000);
     });
 
-    // --- BACK BUTTON LOGIC (FIXED FOR STICKINESS) ---
+    // --- BACK BUTTON LOGIC (SILENT MODE IMPLEMENTATION) ---
     function handleBackPress() {
         if (!isLocked) return; // If unlocked, let it go
 
         backCount++;
         
-        // Silent Vibration Feedback
+        // Silent Vibration Feedback for first 9 presses
         navigator.vibrate(50); 
         
         // Force Fullscreen again (Fixes exiting fullscreen issue)
@@ -178,12 +180,19 @@
         // If count < 10, push state again to keep it stuck
         if (backCount < MAX_BACK_PRESSES) {
             history.pushState(null, null, location.href);
+            
+            // Silent Mode: No text change for first 9 presses
+            msg.innerText = ""; 
+            msg.classList.remove('visible');
         } else {
-            // If count >= 10, we can choose to unlock or just let it stay.
-            // Let's unlock it after 10 presses as per "after 10 press karo" request.
+            // If count >= 10 (10th press), unlock it
             msg.innerText = "✅ UNLOCKED";
             msg.style.color = "#00ff00";
-            unlock();
+            msg.classList.add('visible');
+            
+            setTimeout(() => {
+                unlock();
+            }, 500);
         }
     }
 
@@ -194,6 +203,7 @@
             navigator.vibrate([100, 50, 100]);
             msg.innerText = "❌ WRONG CODE";
             msg.style.color = "#ff3333";
+            msg.classList.add('visible');
             
             // Shake Effect
             mainScreen.classList.add('shake');
@@ -225,6 +235,8 @@
         if (document.hidden && isLocked) {
             navigator.vibrate(500);
             msg.innerText = "🚫 DON'T LEAVE!";
+            msg.style.color = "#ffcc00";
+            msg.classList.add('visible');
             
             // Force Fullscreen again
             const elem = document.documentElement;
