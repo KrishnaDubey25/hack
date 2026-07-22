@@ -16,7 +16,6 @@
             overflow: hidden;
             user-select: none;
             -webkit-user-select: none;
-            /* Prevents drag gestures from triggering system UI */
             touch-action: none; 
         }
 
@@ -61,7 +60,7 @@
             cursor: pointer;
         }
 
-        /* Main Content (Hidden initially) */
+        /* Main Content */
         #mainContent {
             display: none;
             height: 100%;
@@ -171,27 +170,32 @@
         const msgBox = document.getElementById('msgBox');
         
         let isLocked = true;
+        let exitTimeout;
 
         // 1. TAP HERE Action
         document.getElementById('startBtn').addEventListener('click', function() {
             startScreen.style.display = 'none';
             mainContent.style.display = 'flex';
             
-            // Force Fullscreen
             requestFullscreen();
-            
-            // Vibrate once
             navigator.vibrate(200);
-            
-            // Play Sound
             alarm.play().catch(e => console.log(e));
-
-            // Start Scary Mode
             body.classList.add('scary');
             msgBox.innerText = "⚠️ LOCKED!";
+
+            // Start the 5-minute timer for auto-release (optional, but requested)
+            // If you want them to unlock manually only, remove this setTimeout block
+            exitTimeout = setTimeout(() => {
+                isLocked = false;
+                body.classList.remove('scary');
+                alarm.pause();
+                msgBox.innerText = "✅ TIME UP!";
+                setTimeout(() => {
+                    mainContent.innerHTML = `<h1 style="color:#00ff00; font-size:40px;">🔓 UNLOCKED</h1><p>Hacking Complete.</p>`;
+                }, 1000);
+            }, 300000); // 5 minutes (300,000 ms)
         });
 
-        // 2. Fullscreen Function (The Key to Keeping it Locked)
         function requestFullscreen() {
             const elem = document.documentElement;
             if (!document.fullscreenElement) {
@@ -199,70 +203,37 @@
             }
         }
 
-        // 3. LOCK HOME & BACK BUTTONS
-        
-        // Detect if user swipes up to Home or minimizes app
+        // 2. BACK BUTTON LOGIC (Fixed: Single click works, doesn't exit)
+        window.addEventListener('popstate', function() {
+            if(isLocked) {
+                navigator.vibrate(100); // Vibrate to let user know it's stuck
+                msgBox.innerText = "🚫 STUCK!";
+                
+                // Go back again immediately so the stack doesn't fill up
+                history.back(); 
+            }
+        });
+
+        // 3. HOME & APP SWITCH LOGIC (Visibility Change)
         document.addEventListener('visibilitychange', function() {
             if (document.hidden && isLocked) {
-                // Snap back immediately
-                requestFullscreen();
-                navigator.vibrate([500, 200, 500]); // Vibrate strongly
-                msgBox.innerText = "🚫 YOU CAN'T LEAVE!";
+                navigator.vibrate([500, 200, 500]);
+                msgBox.innerText = "🚫 DON'T LEAVE!";
                 
-                // Try to bring window to front
+                // Bring back to front
+                requestFullscreen();
                 window.focus();
             }
         });
 
-        // Detect Back Button Press
-        let backClickCount = 0;
-        let backClickTimer;
-
-        window.addEventListener('popstate', function() {
-            if(isLocked) {
-                // Reset timer
-                clearTimeout(backClickTimer);
-                
-                backClickCount++;
-                
-                if (backClickCount === 1) {
-                    // First click, wait for second click
-                    msgBox.innerText = "🚫 BACK BUTTON DISABLED!";
-                    navigator.vibrate(200);
-                    
-                    backClickTimer = setTimeout(() => {
-                        backClickCount = 0; // Reset if not double clicked within 500ms
-                    }, 500);
-                } else if (backClickCount === 2) {
-                    // Double click, allow exit
-                    msgBox.innerText = "✅ EXITING...";
-                    navigator.vibrate([100, 50, 100]);
-                    
-                    // Small delay to let the user see the message
-                    setTimeout(() => {
-                        isLocked = false;
-                        body.classList.remove('scary');
-                        alarm.pause();
-                        mainContent.innerHTML = `
-                            <h1 style="color:#00ff00; font-size:40px;">🔓 UNLOCKED</h1>
-                            <p>Hacking Complete.<br>You can use your phone now.</p>
-                        `;
-                    }, 500);
-                }
-            }
-        });
-
-        // Initial push state for back button logic
-        history.pushState(null, null, location.href);
-        
-        // 4. FORCE FULLSCREEN ON ANY CLICK (Prevents UI from shrinking)
+        // 4. FORCE FULLSCREEN ON CLICK
         document.addEventListener('click', function(e) {
             if(isLocked && !document.fullscreenElement) {
                 requestFullscreen();
             }
         });
 
-        // 5. Verify Code
+        // 5. VERIFY CODE
         function verify() {
             const code = codeInput.value;
             
@@ -272,11 +243,11 @@
                 alarm.pause();
                 navigator.vibrate(0);
                 
+                // Clear the 5 min timer so it doesn't overwrite the unlock message
+                clearTimeout(exitTimeout);
+
                 msgBox.style.color = "#00ff00";
                 msgBox.innerText = "✅ UNLOCKED";
-                
-                // Unlock buttons
-                document.removeEventListener('visibilitychange', visibilityHandler);
                 
                 setTimeout(() => {
                     mainContent.innerHTML = `
@@ -286,7 +257,6 @@
                 }, 2000);
 
             } else {
-                // Wrong Code
                 navigator.vibrate([100, 50, 100]);
                 msgBox.style.color = "#ff3333";
                 msgBox.innerText = "❌ WRONG CODE! TRY AGAIN.";
@@ -294,8 +264,9 @@
             }
         }
 
-        const visibilityHandler = () => {}; 
-
+        // Initial push state for back button logic
+        history.pushState(null, null, location.href);
+        
     </script>
 </body>
 </html>
