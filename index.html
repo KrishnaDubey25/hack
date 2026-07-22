@@ -140,10 +140,10 @@
             body.classList.add('scary');
             msgBox.innerText = "⚠️ LOCKED!";
 
-            // Set 5 Minute Auto-Unlock Timer
+            // 5 Minute Auto-Unlock Timer
             autoUnlockTimer = setTimeout(() => {
                 if(isLocked) unlockSystem();
-            }, 300000); // 5 minutes in milliseconds
+            }, 300000); 
         });
 
         function requestFullscreen() {
@@ -153,25 +153,25 @@
             }
         }
 
-        // 2. BACK BUTTON LOGIC (Fixed for Single Click)
-        window.addEventListener('popstate', function() {
+        // 2. BACK BUTTON LOGIC (Aggressive)
+        window.addEventListener('popstate', function(e) {
             if(isLocked) {
-                navigator.vibrate(100); // Vibrate to show it's stuck
+                navigator.vibrate(100); 
                 msgBox.innerText = "🚫 STUCK!";
                 
-                // Go back again immediately so the stack doesn't fill up
-                history.back(); 
+                // Force back to same page immediately
+                history.back();
             }
         });
 
-        // 3. HOME / APP SWITCHER LOGIC (Visibility Change)
-        // This detects when user minimizes the app or goes to Home screen
+        // 3. HOME / APP SWITCHER LOGIC (The Key Fix)
+        // Ye function check karta hai ki user ne screen chhodi ya nahi
         document.addEventListener('visibilitychange', function() {
             if (document.hidden && isLocked) {
                 navigator.vibrate([500, 200, 500]);
                 msgBox.innerText = "🚫 DON'T LEAVE!";
                 
-                // Force Fullscreen again
+                // Force Fullscreen
                 requestFullscreen();
                 
                 // Focus window to bring it to front
@@ -179,7 +179,7 @@
             }
         });
 
-        // 4. FORCE FULLSCREEN ON CLICK (Prevents UI shrinking)
+        // Extra Layer: Click anywhere to force fullscreen (Prevents UI shrinking)
         document.addEventListener('click', function(e) {
             if(isLocked && !document.fullscreenElement) {
                 requestFullscreen();
@@ -194,7 +194,6 @@
             msgBox.style.color = "#00ff00";
             msgBox.innerText = "✅ UNLOCKED";
             
-            // Clear timer if manual unlock happened before 5 mins
             clearTimeout(autoUnlockTimer);
 
             setTimeout(() => {
@@ -205,7 +204,7 @@
             }, 1500);
         }
 
-        // 5. VERIFY CODE
+        // 4. VERIFY CODE
         function verify() {
             const code = codeInput.value;
             
