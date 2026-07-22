@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#000000">
     <title>System Locked</title>
     <style>
         body {
@@ -19,10 +18,10 @@
             -webkit-user-select: none;
         }
 
-        /* Scary Background Animation */
+        /* Scary Background */
         body.scary {
             background-color: #300000;
-            animation: pulseRed 0.8s infinite alternate;
+            animation: pulseRed 0.5s infinite alternate;
         }
 
         @keyframes pulseRed {
@@ -60,7 +59,7 @@
             cursor: pointer;
         }
 
-        /* Main Content (Hidden initially) */
+        /* Main Content */
         #mainContent {
             display: none;
             height: 100%;
@@ -130,14 +129,6 @@
             color: #ffcc00;
         }
 
-        /* Lock Overlay to prevent clicks elsewhere */
-        #lockOverlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 998;
-            display: none;
-        }
-
     </style>
 </head>
 <body id="body">
@@ -198,15 +189,11 @@
             msgBox.innerText = "⚠️ LOCKED!";
         });
 
-        // 2. Fullscreen Function
+        // 2. Fullscreen Function (The Key to Keeping it Locked)
         function requestFullscreen() {
             const elem = document.documentElement;
-            if (elem.requestFullscreen) {
+            if (!document.fullscreenElement) {
                 elem.requestFullscreen().catch(err => {});
-            } else if (elem.webkitRequestFullscreen) { /* Safari */
-                elem.webkitRequestFullscreen();
-            } else if (elem.msRequestFullscreen) { /* IE11 */
-                elem.msRequestFullscreen();
             }
         }
 
@@ -220,7 +207,7 @@
                 navigator.vibrate([500, 200, 500]); // Vibrate strongly
                 msgBox.innerText = "🚫 YOU CAN'T LEAVE!";
                 
-                // Try to bring window to front (works on some Androids)
+                // Try to bring window to front
                 window.focus();
             }
         });
@@ -236,13 +223,15 @@
 
         // Initial push state for back button logic
         history.pushState(null, null, location.href);
-        window.addEventListener('popstate', function () {
-            if(isLocked) {
-                history.pushState(null, null, location.href);
+        
+        // 4. FORCE FULLSCREEN ON ANY CLICK (Prevents UI from shrinking)
+        document.addEventListener('click', function(e) {
+            if(isLocked && !document.fullscreenElement) {
+                requestFullscreen();
             }
         });
 
-        // 4. Verify Code
+        // 5. Verify Code
         function verify() {
             const code = codeInput.value;
             
@@ -255,7 +244,7 @@
                 msgBox.style.color = "#00ff00";
                 msgBox.innerText = "✅ UNLOCKED";
                 
-                // Disable the lock mechanisms
+                // Unlock buttons
                 document.removeEventListener('visibilitychange', visibilityHandler);
                 
                 setTimeout(() => {
@@ -274,7 +263,6 @@
             }
         }
 
-        // Helper for visibility change to remove later if needed
         const visibilityHandler = () => {}; 
 
     </script>
