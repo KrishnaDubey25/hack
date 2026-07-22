@@ -3,24 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>System Hacked</title>
+    <title>Hacked</title>
     <style>
-        /* --- CSS Reset & Base Styles --- */
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            outline: none;
-            -webkit-tap-highlight-color: transparent;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; outline: none; }
+        
         body {
-            font-family: 'Courier New', Courier, monospace;
-            background-color: #000000;
-            color: #ffffff;
+            background-color: #000;
+            color: #fff;
+            font-family: 'Courier New', monospace;
             height: 100vh;
             width: 100vw;
-            overflow: hidden; /* Scroll band */
+            overflow: hidden;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -29,355 +22,203 @@
         }
 
         /* --- Animations --- */
-        @keyframes pulse-bg {
-            0% { background-color: #200000; }
-            50% { background-color: #500000; }
-            100% { background-color: #200000; }
+        @keyframes pulse {
+            0% { background-color: #300000; }
+            100% { background-color: #600000; }
         }
+        
+        .scary-bg { animation: pulse 1s infinite alternate; }
 
         @keyframes shake {
-            0% { transform: translate(1px, 1px) rotate(0deg); }
+            0% { transform: translate(2px, 1px) rotate(0deg); }
             10% { transform: translate(-1px, -2px) rotate(-1deg); }
             20% { transform: translate(-3px, 0px) rotate(1deg); }
-            30% { transform: translate(3px, 2px) rotate(0deg); }
+            30% { transform: translate(0px, 1px) rotate(0deg); }
             40% { transform: translate(1px, -1px) rotate(1deg); }
             50% { transform: translate(-1px, 2px) rotate(-1deg); }
             60% { transform: translate(-3px, 1px) rotate(0deg); }
-            70% { transform: translate(3px, 1px) rotate(-1deg); }
-            80% { transform: translate(-1px, -1px) rotate(1deg); }
-            90% { transform: translate(1px, 2px) rotate(0deg); }
-            100% { transform: translate(1px, -2px) rotate(-1deg); }
+            70% { transform: translate(0px, -1px) rotate(1deg); }
+            80% { transform: translate(1px, 2px) rotate(-1deg); }
+            90% { transform: translate(-1px, -1px) rotate(0deg); }
+            100% { transform: translate(1px, -1px) rotate(1deg); }
         }
 
-        .scary-mode {
-            animation: pulse-bg 0.8s infinite alternate;
-        }
+        .shake { animation: shake 0.3s; }
 
-        .shake-element {
-            animation: shake 0.5s;
-        }
-
-        /* --- Start Screen --- */
+        /* --- Layout --- */
         #start-screen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #000;
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            transition: opacity 0.5s ease;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
 
-        .welcome-text {
-            font-size: 3rem;
-            font-weight: bold;
-            margin-bottom: 2rem;
-            text-transform: uppercase;
-            letter-spacing: 4px;
-        }
-
-        #start-btn {
-            padding: 15px 40px;
-            font-size: 1.5rem;
-            background-color: #ff0000;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            box-shadow: 0 0 20px rgba(255, 0, 0, 0.6);
-            transition: transform 0.1s;
-        }
-
-        #start-btn:active {
-            transform: scale(0.95);
-        }
-
-        /* --- Main Hacked Screen --- */
         #main-screen {
-            display: none;
-            width: 90%;
-            max-width: 400px;
-            text-align: center;
-            flex-direction: column;
-            align-items: center;
+            display: none; width: 100%; height: 100%;
+            flex-direction: column; align-items: center; justify-content: center;
+            padding: 20px; text-align: center;
         }
 
-        .logo-container {
-            width: 80px;
-            height: 80px;
-            background: white;
-            margin-bottom: 20px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 4px;
-            padding: 4px;
-        }
+        h1 { font-size: 3rem; color: #ff3333; margin-bottom: 10px; text-shadow: 2px 2px 5px #000; }
+        p { font-size: 1.2rem; color: #ccc; margin-bottom: 40px; }
 
-        .logo-sq {
-            background: black;
-        }
-
-        h1.hacked-title {
-            font-size: 2.5rem;
-            color: #ff3333;
-            text-shadow: 2px 2px 0px #000;
-            margin-bottom: 10px;
-            line-height: 1.2;
-        }
-
-        p.status-text {
-            font-size: 1.2rem;
-            color: #cccccc;
-            margin-bottom: 30px;
-        }
-
-        .input-wrapper {
-            background: rgba(255, 255, 255, 0.1);
+        .input-box {
+            background: rgba(255,255,255,0.1);
             border: 2px solid #ff3333;
-            border-radius: 15px;
             padding: 20px;
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            border-radius: 15px;
+            display: flex; flex-direction: column; align-items: center;
         }
 
-        input#code-input {
-            font-size: 3rem;
-            width: 180px;
-            text-align: center;
-            background: transparent;
-            border: none;
-            color: white;
-            margin-bottom: 15px;
+        input {
+            font-size: 3rem; width: 150px; text-align: center;
+            background: transparent; border: none; color: white; margin-bottom: 20px;
         }
 
-        button.check-btn {
-            padding: 10px 30px;
-            font-size: 1.2rem;
-            background: #ff3333;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
+        button {
+            padding: 15px 40px; font-size: 1.2rem; background: #ff3333;
+            color: white; border: none; border-radius: 8px; cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 51, 51, 0.4);
         }
 
-        .message-box {
-            margin-top: 20px;
-            height: 30px;
-            font-weight: bold;
-            color: #ffcc00;
-            font-size: 1.1rem;
-        }
+        button:active { transform: scale(0.95); }
 
-        /* --- Back Button Counter Display (Optional Visual Cue) --- */
-        .back-counter {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: rgba(0,0,0,0.7);
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-size: 0.8rem;
-            color: #fff;
-            display: none; /* Hidden by default, shown via JS if needed */
-        }
+        #msg { height: 30px; margin-top: 20px; font-weight: bold; color: #ffcc00; }
 
     </style>
 </head>
 <body id="body">
 
-    <!-- Audio Element -->
-    <audio id="alarm-sound" src="Dangerous.mp3" loop></audio>
+    <audio id="alarm" src="Dangerous.mp3" loop></audio>
 
-    <!-- Back Button Logic Indicator -->
-    <div class="back-counter" id="back-indicator">Back: 0/10</div>
-
-    <!-- Screen 1: Welcome -->
+    <!-- Start Screen -->
     <div id="start-screen">
-        <h1 class="welcome-text">Welcome</h1>
+        <h1 style="color:white;">WELCOME</h1>
         <button id="start-btn">TAP HERE</button>
     </div>
 
-    <!-- Screen 2: Hacked UI -->
+    <!-- Main Hacked Screen -->
     <div id="main-screen">
-        <!-- Logo -->
-        <div class="logo-container">
-            <div class="logo-sq"></div><div class="logo-sq"></div>
-            <div class="logo-sq"></div><div class="logo-sq"></div>
+        <h1>SYSTEM<br>HACKED</h1>
+        <p>Data Deleting...</p>
+        
+        <div class="input-box">
+            <input type="number" id="code" placeholder="Code">
+            <button onclick="verify()">VERIFY</button>
         </div>
 
-        <!-- Text Content -->
-        <h1 class="hacked-title">SYSTEM<br>HACKED</h1>
-        <p class="status-text">Data Deleting...<br>Please wait.</p>
-
-        <!-- Input Area -->
-        <div class="input-wrapper">
-            <input type="number" id="code-input" placeholder="Code">
-            <button class="check-btn" onclick="verifyCode()">VERIFY</button>
-        </div>
-
-        <!-- Feedback Message -->
-        <div class="message-box" id="msg-display"></div>
+        <div id="msg"></div>
     </div>
 
-    <script>
-        // --- Variables & Configuration ---
-        const body = document.getElementById('body');
-        const startScreen = document.getElementById('start-screen');
-        const mainScreen = document.getElementById('main-screen');
-        const alarmSound = document.getElementById('alarm-sound');
-        const codeInput = document.getElementById('code-input');
-        const msgDisplay = document.getElementById('msg-display');
-        const backIndicator = document.getElementById('back-indicator');
+<script>
+    const body = document.getElementById('body');
+    const startScreen = document.getElementById('start-screen');
+    const mainScreen = document.getElementById('main-screen');
+    const alarm = document.getElementById('alarm');
+    const codeInput = document.getElementById('code');
+    const msg = document.getElementById('msg');
 
-        // State Variables
-        let isLocked = true;
-        let backPressCount = 0;
-        const MAX_BACK_PRESSES = 10; // Back button will only work after 10 presses
-        const CORRECT_CODE = "83558";
+    let isLocked = true;
+    let backCount = 0;
+    const MAX_BACK_PRESSES = 10;
+    const CORRECT_CODE = "83558";
 
-        // --- Event Listeners ---
+    // Start Function
+    document.getElementById('start-btn').addEventListener('click', () => {
+        startScreen.style.display = 'none';
+        mainScreen.style.display = 'flex';
+        
+        // Effects
+        body.classList.add('scary-bg');
+        navigator.vibrate(200);
+        alarm.play().catch(e => console.log("Audio error"));
 
-        // 1. Start Button Click
-        document.getElementById('start-btn').addEventListener('click', function() {
-            startHacking();
-        });
+        // Lock Logic
+        msg.innerText = "🚫 LOCKED";
+        
+        // Initialize History Stack for Back Button Trap
+        history.pushState(null, null, location.href);
+        
+        // Auto Unlock in 5 mins
+        setTimeout(() => { if(isLocked) unlock(); }, 300000);
 
-        // 2. Back Button / Swipe Logic
+        // Bind Back Button
         window.onpopstate = function () {
-            if (isLocked) {
-                handleBackPress();
-            } else {
-                // If unlocked, allow normal back behavior or close app
-                history.pushState(null, null, location.href); // Keep it stuck even if unlocked? No, let's exit.
-                window.onpopstate = null; // Remove listener to allow exit
-            }
+            handleBackPress();
         };
+    });
 
-        // --- Functions ---
+    // --- BACK BUTTON LOGIC (FIXED) ---
+    function handleBackPress() {
+        if (!isLocked) return; // If already unlocked, do nothing or let it go
 
-        function startHacking() {
-            // UI Transition
-            startScreen.style.opacity = '0';
-            setTimeout(() => {
-                startScreen.style.display = 'none';
-                mainScreen.style.display = 'flex';
-            }, 500);
-
-            // Effects
-            body.classList.add('scary-mode');
-            navigator.vibrate(200);
-            
-            // Audio (Handle autoplay policy)
-            alarmSound.play().catch(e => console.log("Audio play failed", e));
-
-            // Status
-            msgDisplay.innerText = "🚫 LOCKED!";
-            msgDisplay.style.color = "#ffcc00";
-
-            // Initialize History for Back Button Trap
-            history.pushState(null, null, location.href);
-            
-            // Auto Unlock after 5 minutes (300,000 ms)
-            setTimeout(() => {
-                if(isLocked) unlockSystem();
-            }, 300000);
+        backCount++;
+        
+        // Silent Vibration Feedback (No Text for first 9 presses)
+        navigator.vibrate(50); 
+        
+        // Force Fullscreen again (Fixes exiting fullscreen issue)
+        const elem = document.documentElement;
+        if (!document.fullscreenElement) {
+            elem.requestFullscreen().catch(err => {});
         }
 
-        function handleBackPress() {
-            backPressCount++;
-            
-            // Visual Feedback
-            msgDisplay.innerText = `🚫 STUCK! (${backPressCount}/${MAX_BACK_PRESSES})`;
-            navigator.vibrate([50, 50, 50]); // Vibrate pattern
+        // If count < 10, push state again to keep it stuck
+        if (backCount < MAX_BACK_PRESSES) {
+            history.pushState(null, null, location.href);
+        } else {
+            // If count >= 10, we can choose to unlock or just let it stay.
+            // Let's unlock it after 10 presses as per "after 10 press karo" request.
+            msg.innerText = "✅ UNLOCKED";
+            msg.style.color = "#00ff00";
+            unlock();
+        }
+    }
 
-            // Force Fullscreen again (Android quirk)
+    function verify() {
+        if (codeInput.value === CORRECT_CODE) {
+            unlock();
+        } else {
+            navigator.vibrate([100, 50, 100]);
+            msg.innerText = "❌ WRONG CODE";
+            msg.style.color = "#ff3333";
+            
+            // Shake Effect
+            mainScreen.classList.add('shake');
+            setTimeout(() => mainScreen.classList.remove('shake'), 300);
+            
+            codeInput.value = "";
+        }
+    }
+
+    function unlock() {
+        isLocked = false;
+        body.classList.remove('scary-bg');
+        alarm.pause();
+        
+        // Remove History Listener to allow normal back/exit
+        window.onpopstate = null;
+
+        setTimeout(() => {
+            mainScreen.innerHTML = `
+                <h1 style="color:#00ff00;">UNLOCKED</h1>
+                <p>Hacking Complete.</p>
+                <button onclick="location.reload()">RESET</button>
+            `;
+        }, 500);
+    }
+
+    // Handle Home Button / Visibility Change
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden && isLocked) {
+            navigator.vibrate(500);
+            msg.innerText = "🚫 DON'T LEAVE!";
             const elem = document.documentElement;
             if (!document.fullscreenElement) {
                 elem.requestFullscreen().catch(err => {});
             }
-
-            // If count reaches MAX, we can choose to unlock or just let it stay stuck.
-            // Based on request: "after 10 press kardo" implies it works after 10.
-            if (backPressCount >= MAX_BACK_PRESSES) {
-                msgDisplay.innerText = "✅ UNLOCKED BY BACK PRESS!";
-                msgDisplay.style.color = "#00ff00";
-                // Optional: Auto unlock or wait for user to click verify? 
-                // Let's keep it locked until code is entered, but allow exit if we want.
-                // For this demo, we will unlock the UI visually but keep logic locked until code.
-                // OR, simpler: Just remove the lock state.
-                unlockSystem();
-            } else {
-                // Push state again to prevent going back
-                history.pushState(null, null, location.href);
-            }
         }
+    });
 
-        function verifyCode() {
-            const userCode = codeInput.value;
-
-            if (userCode === CORRECT_CODE) {
-                unlockSystem();
-            } else {
-                // Wrong Code Logic
-                navigator.vibrate([100, 50, 100]);
-                msgDisplay.style.color = "#ff3333";
-                msgDisplay.innerText = "❌ WRONG CODE!";
-                
-                // Shake animation
-                mainScreen.classList.add('shake-element');
-                setTimeout(() => {
-                    mainScreen.classList.remove('shake-element');
-                }, 500);
-
-                codeInput.value = "";
-            }
-        }
-
-        function unlockSystem() {
-            isLocked = false;
-            
-            // Stop Effects
-            body.classList.remove('scary-mode');
-            alarmSound.pause();
-            
-            // Update UI
-            msgDisplay.style.color = "#00ff00";
-            msgDisplay.innerText = "✅ SYSTEM UNLOCKED";
-            
-            // Clear Input
-            codeInput.value = "";
-
-            // Show Success Message after delay
-            setTimeout(() => {
-                mainScreen.innerHTML = `
-                    <h1 style="color:#00ff00; font-size:3rem;">UNLOCKED</h1>
-                    <p style="font-size:1.5rem; margin-top:20px;">Hacking Complete.</p>
-                    <button onclick="location.reload()" style="margin-top:30px; padding:10px 20px; font-size:1.2rem;">RESET</button>
-                `;
-            }, 1500);
-        }
-
-        // Handle Visibility Change (Home Button Press)
-        document.addEventListener('visibilitychange', function() {
-            if (document.hidden && isLocked) {
-                navigator.vibrate(500);
-                msgDisplay.innerText = "🚫 DON'T LEAVE!";
-                
-                // Force Fullscreen again
-                const elem = document.documentElement;
-                if (!document.fullscreenElement) {
-                    elem.requestFullscreen().catch(err => {});
-                }
-            }
-        });
-
-    </script>
+</script>
 </body>
 </html>
